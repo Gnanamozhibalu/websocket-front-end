@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
 import "./MultiUser.css";
 
-const socket = io.connect("http://localhost:4000");
+const socket = io.connect("https://websocket-back-end.herokuapp.com/");
 
 function MultiUser() {
   const [state, setStaet] = useState({
-    message: "Pressed the Button",
+    message: "pressed the button",
     name: "",
   });
   const [chat, setChat] = useState([]);
-  //chat A
-  const [stateA, setStaetA] = useState({
-    message: "Pressed the Button",
-    name: "",
-  });
-  const [chatA, setChatA] = useState([]);
+  const [button1Enable, setButton1Enable] = useState(false);
+  const [button2Enable, setButton2Enable] = useState(false);
 
   useEffect(() => {
     socket.on("message", ({ name, message }) => {
@@ -28,13 +25,12 @@ function MultiUser() {
     setStaet({ ...state, [e.target.name]: e.target.value });
   };
 
-  const onMessageSubmit = (e) => {
+  /* const onMessageSubmit = (e) => {
     e.preventDefault();
     const { name, message } = state;
     socket.emit("message", { name, message });
-    /* setStaet({ message: 'Pressed the Button', name }) */
-  };
-
+    setStaet({ message: '', name })
+  }; */
   const renderbuttonclick = () => {
     return chat.map(({ name, message }, index) => (
       <div key={index}>
@@ -45,38 +41,34 @@ function MultiUser() {
     ));
   };
 
-  //chat A
-  useEffect(() => {
-    socket.on("message", ({ name, message }) => {
-      setChatA([...chatA, { name, message }]);
-    });
-  });
-
-  const onTextChangeA = (e) => {
-    setStaetA({ ...stateA, [e.target.name]: e.target.value });
-  };
-
-  const onMessageSubmitA = (e) => {
+  const onEnable = (e) => {
     e.preventDefault();
-    const { name, message } = stateA;
+    setStaet({
+      message: "Enabled the Button 1",
+      name:state.name,
+    })
+    const { name, message } = state;
+    setButton1Enable(true);
+    setButton2Enable(false);
     socket.emit("message", { name, message });
-    /* setStaet({ message: 'Pressed the Button', name }) */
   };
 
-  const renderbuttonclickA = () => {
-    return chatA.map(({ name, message }, index) => (
-      <div key={index}>
-        <h3>
-          {name} <span>{message}</span>
-        </h3>
-      </div>
-    ));
+  const onDisable = (e) => {
+    e.preventDefault();
+    setStaet({
+      message: "Enabled the Button 2",
+      name:state.name,
+    })
+    const { name, message } = state;
+    setButton2Enable(true);
+    setButton1Enable(false);
+    socket.emit("message", { name, message });
   };
 
   return (
     <div className="card">
-      <form onSubmit={onMessageSubmit}>
-        <h1>USER A</h1>
+      <form>
+        <h1>WELCOME USER</h1>
         <div className="name-field">
           <TextField
             name="name"
@@ -85,22 +77,25 @@ function MultiUser() {
             label="Name"
           />
         </div>
-        <button>Click the Button</button>
-        {renderbuttonclick()}
-      </form>
-
-      <form onSubmit={onMessageSubmitA}>
-        <h1>USER B</h1>
-        <div className="name-field">
-          <TextField
-            name="name"
-            onChange={(e) => onTextChangeA(e)}
-            value={stateA.name}
-            label="Name"
-          />
+        <div>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={button1Enable}
+          onClick={onEnable}
+        >
+          Button 1
+        </Button>
         </div>
-        <button>Click the Button</button>
-        {renderbuttonclickA()}
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={button2Enable}
+          onClick={onDisable}
+        >
+          button 2
+        </Button>
+        {renderbuttonclick()}
       </form>
     </div>
   );
